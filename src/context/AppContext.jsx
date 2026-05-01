@@ -2,13 +2,11 @@ import { createContext, useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { dummyProducts } from "../assets/assets";
 import { useEffect } from "react";
-import toast, {Toaster} from "react-hot-toast"
+import toast, { Toaster } from "react-hot-toast";
 
 export const AppContext = createContext();
 
 export const AppContextProvider = ({ children }) => {
-
-
   const currency = import.meta.VITE_CURRENCY;
 
   const navigate = useNavigate();
@@ -20,51 +18,63 @@ export const AppContextProvider = ({ children }) => {
 
   // Fetch All Products
   const fetchProducts = async (params) => {
-    setProducts(dummyProducts)
-  }
+    setProducts(dummyProducts);
+  };
 
   // Add Product to Cart
-  const addToCart = (itemId)=>{
+  const addToCart = (itemId) => {
     let cartData = structuredClone(cartItems);
 
     if (cartData[itemId]) {
-      cartData[itemId] +=1;
-    }else {
-      cartData[itemId] =1;
+      cartData[itemId] += 1;
+    } else {
+      cartData[itemId] = 1;
     }
     setCartItems(cartData);
-    toast.success("Added to Card")
-  }
+    toast.success("Added to Card");
+  };
 
   // Update Cart Item Quantity
-  const updateCartItem = (itemId,quantity)=>{
-
+  const updateCartItem = (itemId, quantity) => {
     let cartData = structuredClone(cartItems);
-    cartData[itemId] =quantity;
-    setCartItems(cartData)
-    toast.success("Cart Updated")
-  }
+    cartData[itemId] = quantity;
+    setCartItems(cartData);
+    toast.success("Cart Updated");
+  };
 
   // Remove Product from cart
-  const removeFromCart = (itemId)=>{
-
+  const removeFromCart = (itemId) => {
     let cartData = structuredClone(cartItems);
     if (cartData[itemId]) {
-      cartData[itemId] -=1;
+      cartData[itemId] -= 1;
       if (cartData[itemId] === 0) {
-       delete cartData[itemId];
+        delete cartData[itemId];
       }
     }
-    toast.success("Removed From Cart")
-    setCartItems(cartData)
-  }
+    toast.success("Removed From Cart");
+    setCartItems(cartData);
+  };
 
-  useEffect(()=>{
-    fetchProducts()
-  },[])
+  useEffect(() => {
+    fetchProducts();
+  }, []);
 
-  const value = { currency, navigate, user, setUser, isSeller, setisSeller,showUserLogin,
-     setshowUserLogin, products, setProducts, addToCart, removeFromCart, updateCartItem,cartItems };
+  const value = {
+    currency,
+    navigate,
+    user,
+    setUser,
+    isSeller,
+    setisSeller,
+    showUserLogin,
+    setshowUserLogin,
+    products,
+    setProducts,
+    addToCart,
+    removeFromCart,
+    updateCartItem,
+    cartItems,
+  };
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };
 
