@@ -2,7 +2,7 @@ import React from "react";
 import { useAppContext } from "../context/AppContext";
 
 const Login = () => {
-  const {setshowUserLogin} = useAppContext();
+  const { setshowUserLogin, setUser } = useAppContext();
 
   const [state, setState] = React.useState("login");
   const [formData, setFormData] = React.useState({
@@ -13,6 +13,18 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (state === "login") {
+      // Login 
+      console.log("Logging in...", formData);
+      setUser({ name: "User", email: formData.email }); // පරීක්ෂා කිරීමට (Testing)
+    } else {
+      // Sign up 
+      console.log("Registering...", formData);
+    }
+
+    // After Login Modal close
+    setshowUserLogin(false);
   };
 
   const handleChange = (e) => {
@@ -26,7 +38,7 @@ const Login = () => {
       className="justify-center fixed top-0 bottom-0 left-0 right-0 z-30 flex items-center text-sm text-gray-600 bg-black/50"
     >
       <form
-        onSubmit={handleSubmit}  
+        onSubmit={handleSubmit}
         onClick={(e) => e.stopPropagation()}
         className="sm:w-[350px] w-full text-center border border-gray-300/60 rounded-2xl px-8 bg-white"
       >
@@ -121,7 +133,7 @@ const Login = () => {
         </div>
         <button
           type="submit"
-          className="mt-2 w-full h-11 rounded-full text-white bg-primary hover:bg-primary-dull transition-opacity"
+          className="mt-2 w-full h-11 rounded-full text-white bg-primary hover:bg-primary-dull transition-opacity cursor-pointer"
         >
           {state === "login" ? "Login" : "Sign up"}
         </button>
