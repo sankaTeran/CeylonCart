@@ -1,0 +1,28 @@
+npm install bcryptjs cloudinary cookie-parser cors dotenv express jsonwebtoken mongoose multer stripe
+
+
+bcryptjs: User-ge passwords kelinma database eke save karanne nathuwa, ewa "hash" (encrypt) karala rakshitha widihata save karanna use karanawa.
+
+cloudinary: Images saha videos cloud eke store karanna saha manage karanna dena service ekak. (Udaharanayakata product images upload karanna).
+
+cookie-parser: Browser eke thiyena cookies kiyawanna saha ewa ekka wada karanna udaw wenawa.
+
+cors: (Cross-Origin Resource Sharing) Frontend ekata (Ex: React) wena domain ekaka thiyena Backend API ekak contact karanna awasaraya dena security feature ekak.
+
+dotenv: API Keys, Database URL wage sensitive details .env file ekaka dapuwa load karaganna use karanawa.
+
+express: Node.js walin API ekak hadanna thiyena popular ma framework eka. Request handling lesi karanawa.
+
+jsonwebtoken (JWT): Users-la login unama eyaala kauda kiyala haduna ganna "Token" ekak hadanna saha eka verify karanna use karanawa (Authentication).
+
+mongoose: MongoDB database ekath ekka lesiyen wada karanna (Data save karanna, search karanna) dena tool ekak.
+
+multer: Frontend eken ewana files (Images, PDFs) backend ekata ganna (upload karanna) use karana middleware ekak.
+
+stripe: Online payments (Credit/Debit cards) handle karanna use karana payment gateway ekak.
+
+
+npm install nodemon --save-dev
+
+
+nodemon: Meeka oyaage Node.js code ekak save karana hama wathawakama automaticaly server eka restart karana tool ekak. Code eka wenas karana hama parama manually node index.js wage command gahanna ona wenne na.
