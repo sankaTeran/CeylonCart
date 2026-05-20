@@ -1,8 +1,28 @@
 import React from "react";
 import { useAppContext } from "../../context/AppContext";
+import axios from "axios";
 
 const ProductList = () => {
-  const { products, currency } = useAppContext();
+  const { products, currency, axios, fetchProducts } = useAppContext();
+
+  // Toggle the stock status of a product (In Stock / Out of Stock)
+  const toggleStock = async (id, inStock) => {
+    try {
+      // Send a POST request to the backend with the product ID and its updated stock status
+      const { data } = await axios.post("/api/product/stock", { id, inStock });
+
+      // Check if the server successfully updated the stock status
+      if (data.success) {
+        // Refresh the product list on the frontend to reflect the newly updated stock data
+        fetchProducts();
+        toast.success(data.message);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
 
   return (
     <div className="flex-1 py-10 flex flex-col justify-between">
@@ -43,6 +63,10 @@ const ProductList = () => {
                   <td className="px-4 py-3">
                     <label className="relative inline-flex items-center cursor-pointer text-gray-900 gap-3">
                       <input
+                        onClick={() =>
+                          toggleStock(product._id, !product.inStock)
+                        }
+                        checked={product.inStock}
                         type="checkbox"
                         className="sr-only peer"
                       />

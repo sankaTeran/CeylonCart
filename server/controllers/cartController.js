@@ -10,7 +10,7 @@ export const updateCart = async (req, res) => {
       return res.json({ success: false, message: "Cart items are required" });
     }
 
-    await User.findByIdAndUpdate(userId, { cartData: cartItems });
+    await User.findByIdAndUpdate(userId, { cartItems: cartItems });
 
     return res.json({ success: true, message: "Cart Updated" });
   } catch (error) {

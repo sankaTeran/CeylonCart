@@ -2,9 +2,10 @@ import React, { useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import { assets } from "../assets/assets";
 import { useAppContext } from "../context/AppContext";
+import toast from "react-hot-toast";
 
 function NavBar() {
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen ] = React.useState(false);
   const {
     user,
     setUser,
@@ -13,11 +14,27 @@ function NavBar() {
     searchQuery,
     setSearchQuery,
     getCartItemCount,
+    axios
   } = useAppContext();
 
+  // Logout the current User from the system
   const logout = async () => {
-    setUser(null);
-    navigate("/");
+    try {
+      // Send a GET request to the backend logout API endpoint to clear the authentication cookies/tokens
+      const { data } = await axios.get("/api/user/logout");
+
+      if (data.success) {
+        toast.success(data.message);
+        setUser(null);
+        navigate("/");
+        console.log("home");
+        
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
   };
 
   useEffect(() => {

@@ -1,5 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { assets } from "../assets/assets";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+import { useAppContext } from "../context/AppContext";
 
 // Input Field Component
 const InputField = ({ type, placeholder, name, handleChange, address }) => (
@@ -16,6 +19,8 @@ const InputField = ({ type, placeholder, name, handleChange, address }) => (
 );
 
 const AddAddress = () => {
+  const { axios, user, navigate } = useAppContext();
+
   const [address, setAddrress] = useState({
     firstName: "",
     lastName: "",
@@ -28,6 +33,26 @@ const AddAddress = () => {
     phone: "",
   });
 
+  const onSubmitHandler = async (e) => {
+    e.preventDefault();
+    try {
+      
+      const { data } = await axios.post(
+        "/api/address/add",
+        { address }
+      );
+
+      if (data.success) {
+        toast.success(data.message);
+        navigate("/cart");
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -37,10 +62,12 @@ const AddAddress = () => {
     }));
   };
 
-  const onSubmitHandler = async (e) => {
-    e.preventDefault();
-    console.log("Submitted Address:", address);
-  };
+  useEffect(() => {
+    // If the user is not authenticated/logged in, redirect them to the cart page
+    if (!user) {
+      navigate("/cart");
+    }
+  }, [user, navigate]); // Added user and navigate to dependency array for safety
 
   return (
     <div className="mt-16 pb-16">

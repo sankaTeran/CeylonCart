@@ -1,8 +1,9 @@
 import React from "react";
 import { useAppContext } from "../context/AppContext";
+import toast from "react-hot-toast";
 
 const Login = () => {
-  const { setshowUserLogin, setUser } = useAppContext();
+  const { setshowUserLogin, setUser, navigate, axios } = useAppContext();
 
   const [state, setState] = React.useState("login");
   const [formData, setFormData] = React.useState({
@@ -14,18 +15,45 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (state === "login") {
-      // Login 
-      console.log("Logging in...", formData);
-      setUser({ name: "User", email: formData.email }); // පරීක්ෂා කිරීමට (Testing)
-    } else {
-      // Sign up 
-      console.log("Registering...", formData);
-    }
+    try {
+      const { data } = await axios.post(`/api/user/${state}`, formData);
 
-    // After Login Modal close
-    setshowUserLogin(false);
+      if (data.success) {
+        navigate("/");
+        setUser(data.user);
+        setshowUserLogin(false);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
   };
+
+  // Handle User Login / Sign Up form submission
+  // const onSubmitHandler = async (event) => {
+  //   try {
+  //     // (stops the page from reloading)
+  //     event.preventDefault();
+
+  //     const { data } = await axios.post(`/api/user/${state}`, {
+  //       name,
+  //       email,
+  //       password,
+  //     });
+
+  //     // Check if the authentication process was successful on the backend
+  //     if (data.success) {
+  //       navigate("/");
+  //       setUser(data.user);
+  //       setShowUserLogin(false); // Close the login/register modal or popup container
+  //     } else {
+  //       toast.error(data.message);
+  //     }
+  //   } catch (error) {
+  //     toast.error(error.message);
+  //   }
+  // };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
