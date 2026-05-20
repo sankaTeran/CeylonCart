@@ -1,7 +1,8 @@
 import { useContext, useEffect } from "react";
 import { useState } from "react";
-import { AppContext } from "../context/AppContext";
+import { AppContext, useAppContext } from "../context/AppContext";
 import { assets, dummyAddress } from "../assets/assets";
+import toast from "react-hot-toast";
 
 const Cart = () => {
   const {
@@ -13,23 +14,48 @@ const Cart = () => {
     getCartAmount,
     navigate,
     updateCartItem,
-  } = useContext(AppContext);
-  const [cartArray, setCartArray] = useState([]);
-  const [addrress, setAddrress] = useState(dummyAddress);
-  const [showAddress, setShowAddress] = useState(false);
-  const [selectedAddrress, setSelectedAddrress] = useState(dummyAddress[0]);
-  const [paymentOption, setPaymentOption] = useState("COD");
+    user,
+    setCartItems,
+    axios,
+  } = useAppContext();
 
-  const placeOrder = async (params) => {};
+  const [cartArray, setCartArray] = useState([]);
+
+  // 💡 ස්පෙලින්ග්ස් නිවැරදි කලා: addrress -> addresses | selectedAddrress -> selectedAddress
+  const [addresses, setAddresses] = useState([]);
+  const [showAddress, setShowAddress] = useState(false);
+  const [selectedAddress, setSelectedAddress] = useState(null);
+  const [paymentOption, setPaymentOption] = useState("COD");
 
   const getCart = () => {
     let tempArray = [];
     for (const key in cartItems) {
       const product = products.find((item) => item._id === key);
-      product.quantity = cartItems[key];
-      tempArray.push(product);
+      if (product) {
+        product.quantity = cartItems[key];
+        tempArray.push(product);
+      }
     }
     setCartArray(tempArray);
+  };
+
+  const getUserAddress = async () => {
+    try {
+      const { data } = await axios.get("/api/address/get");
+
+      if (data.success) {
+        setAddresses([]);
+
+        setAddresses(data.addresses);
+        if (data.addresses.length > 0) {
+          setSelectedAddress(data.addresses[0]);
+        }
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
   };
 
   useEffect(() => {
@@ -37,6 +63,65 @@ const Cart = () => {
       getCart();
     }
   }, [products, cartItems]);
+
+  useEffect(() => {
+    if (user) {
+      getUserAddress();
+    }
+  }, [user]);
+
+  const placeOrder = async () => {
+    try {
+      // 💡 1. මුලින්ම ඇඩ්‍රස් එකක් තෝරලා තියෙනවාද කියලා චෙක් කරනවා
+      if (!selectedAddress) {
+        return toast.error("Please select an address");
+      }
+
+      // 💡 2. පේමන්ට් ඔප්ෂන් එක COD (Cash On Delivery) නම් විතරක් මේක ඇතුළට යනවා
+      if (paymentOption === "COD") {
+        // බැක්එන්ඩ් API එකට ඕඩර් එකට අදාල දත්ත ටික පෝස්ට් (Post) කරනවා
+        const { data } = await axios.post("/api/order/cod", {
+          userId: user._id,
+          // cartArray එක ඇතුලේ තියෙන product object එකෙන් _id එක විතරක් map කරලා ගන්නවා
+          items: cartArray.map((item) => ({
+            product: item._id,
+            quantity: item.quantity,
+          })),
+          address: selectedAddress._id, // තෝරාගත් ඇඩ්‍රස් එකේ ID එක යවනවා
+        });
+
+        // 💡 3. ඕඩර් එක සක්සස් නම් කාර්ට් එක ක්ලියර් කරලා ඕඩර් පේජ් එකට යවනවා
+        if (data.success) {
+          toast.success(data.message);
+          setCartItems({}); // 👈 Frontend එකේ කාර්ට් එක හිස් කරනවා
+          navigate("/my-orders"); // 👈 යූසර්ව ඕඩර් හිස්ට්‍රි පේජ් එකට නාවිගේට් කරනවා
+        } else {
+          toast.error(data.message);
+        }
+      } else {
+        // Place Order with Stripe
+        const { data } = await axios.post("/api/order/stripe", {
+          userId: user._id,
+          items: cartArray.map((item) => ({
+            product: item._id,
+            quantity: item.quantity,
+          })),
+          address: selectedAddress._id,
+        });
+
+        console.log("Stripe Response Data:", data); // 👈 මේ console.log එක දාලා බලන්න URL එක එනවද කියලා
+
+        if (data.success && data.url) {
+          // 💡 වඩාත් ආරක්ෂිත සහ ස්ථාවර ක්‍රමය
+          window.location.href = data.url;
+        } else {
+          toast.error(data.message || "Stripe URL not found!");
+        }
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || error.message);
+    }
+  };
 
   return products.length > 0 && cartItems ? (
     <div className="flex flex-col md:flex-row mt-16">
@@ -119,7 +204,7 @@ const Cart = () => {
               onClick={() => removeFromCart(product._id)}
               className="cursor-pointer mx-auto"
             >
-              <img src={assets.remove_icon } alt="remove" />
+              <img src={assets.remove_icon} alt="remove" />
             </button>
           </div>
         ))}
@@ -149,8 +234,8 @@ const Cart = () => {
           <p className="text-sm font-medium uppercase">Delivery Address</p>
           <div className="relative flex justify-between items-start mt-2">
             <p className="text-gray-500">
-              {selectedAddrress
-                ? `${selectedAddrress.street}, ${selectedAddrress.city},${selectedAddrress.state},${selectedAddrress.country}`
+              {selectedAddress
+                ? `${selectedAddress.street}, ${selectedAddress.city}, ${selectedAddress.state}, ${selectedAddress.country}`
                 : "No address found"}
             </p>
             <button
@@ -159,23 +244,25 @@ const Cart = () => {
             >
               Change
             </button>
+
             {showAddress && (
-              <div className="absolute top-12 py-1 bg-white border border-gray-300 text-sm w-full">
-                {addrress.map((address, index) => (
+              <div className="absolute top-12 py-1 bg-white border border-gray-300 text-sm w-full z-10">
+                {addresses.map((address, index) => (
                   <p
+                    key={index}
                     onClick={() => {
-                      setSelectedAddrress(address);
+                      setSelectedAddress(address);
                       setShowAddress(false);
                     }}
-                    className="text-gray-500 p-2 hover:bg-gray-100"
+                    className="text-gray-500 p-2 hover:bg-gray-100 cursor-pointer"
                   >
-                    {address.street},{address.city},{address.state},
+                    {address.street}, {address.city}, {address.state},{" "}
                     {address.country}
                   </p>
                 ))}
                 <p
                   onClick={() => navigate("/add-address")}
-                  className="text-primary text-center cursor-pointer p-2 hover:bg-primary-dull/10"
+                  className="text-primary text-center cursor-pointer p-2 hover:bg-primary-dull/10 border-t border-gray-100"
                 >
                   Add address
                 </p>

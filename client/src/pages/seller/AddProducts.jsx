@@ -34,7 +34,9 @@ const AddProducts = () => {
 
       // Append images one by one to FormData
       for (let i = 0; i < files.length; i++) {
-        formData.append("images", files[i]);
+        if (files[i]) {
+          formData.append("images", files[i]);
+        }
       }
 
       // 3. Send data to the server via Axios (API Request)
@@ -173,7 +175,7 @@ const AddProducts = () => {
             />
           </div>
         </div>
-        <button className="px-8 py-2.5 bg-primary text-white font-medium rounded">
+        <button className="px-8 py-2.5 bg-primary text-white font-medium cursor-pointer rounded">
           ADD
         </button>
       </form>
