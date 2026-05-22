@@ -50,7 +50,7 @@ const MyOrders = () => {
               } border-gray-300 flex flex-col md:flex-row md:items-center justify-between p-4 py-5 md:gap-16 w-full max-w-4xl`}
               // className="flex flex-col md:flex-row justify-between items-center border-b py-4"
             >
-              {/* Product Details Section */}
+              {/* Product Details Section
               <div className="flex items-center mb-4 md:mb-0">
                 <div className="bg-primary/10 p-4 rounded-lg">
                   <img
@@ -64,6 +64,23 @@ const MyOrders = () => {
                     {item.product.name}
                   </h2>
                   <p>Category: {item.product.category}</p>
+                </div>
+              </div> */}
+              {/* Product Details Section */}
+              <div className="flex items-center mb-4 md:mb-0">
+                <div className="bg-primary/10 p-4 rounded-lg">
+                  <img
+                  
+                    src={item?.product?.image?.[0] || assets.upload_area}
+                    alt={item?.product?.name || "Product"}
+                    className="w-16 h-16 object-cover"
+                  />
+                </div>
+                <div className="ml-4">
+                  <h2 className="text-xl font-medium text-gray-800">
+                    {item?.product?.name || "Unknown Product"}
+                  </h2>
+                  <p>Category: {item?.product?.category || "N/A"}</p>
                 </div>
               </div>
 

@@ -135,6 +135,7 @@ const AddProducts = () => {
           <select
             id="category"
             className="outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40"
+            value={category}
             onChange={(e) => setCategory(e.target.value)}
           >
             <option value="">Select Category</option>
